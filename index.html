@@ -1,79 +1,384 @@
-<?xml version="1.0"?>
-<overlayModel xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <arguments>supportsTransformControls </arguments>
-  <overlayName>qy4rq4y</overlayName>
-  <overlayX>1080</overlayX>
-  <overlayY>1920</overlayY>
-  <Elements>
-    <elementModel>
-      <ElementType>LandingRate</ElementType>
-      <ElementName>LDGR</ElementName>
-      <properties>
-        <elementProperty>
-          <PropertyValue>276,158</PropertyValue>
-          <PropertyType>Size</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>0.9</PropertyValue>
-          <PropertyType>Opacity</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>511,956</PropertyValue>
-          <PropertyType>Position</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>0</PropertyValue>
-          <PropertyType>Rotation</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>C:\CAG2 Software\FlyLive Studio\Templates\qy4rq4y\LDGR.png</PropertyValue>
-          <PropertyType>BackgroundImage</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>5</PropertyValue>
-          <PropertyType>VisibleDuration</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>Landing Rate</PropertyValue>
-          <PropertyType>TopText</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>0.03</PropertyValue>
-          <PropertyType>TopTextTopMargin</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>Normal 400 Arial Normal</PropertyValue>
-          <PropertyType>TopTextFontFamily</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>20</PropertyValue>
-          <PropertyType>TopTextFontSize</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>FFFFFF</PropertyValue>
-          <PropertyType>TopTextFontColor</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>fpm</PropertyValue>
-          <PropertyType>LandingRateText</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>0.07</PropertyValue>
-          <PropertyType>LandingRateTopMargin</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>Normal 400 Arial Normal</PropertyValue>
-          <PropertyType>LandingRateFontFamily</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>50</PropertyValue>
-          <PropertyType>LandingRateFontSize</PropertyType>
-        </elementProperty>
-        <elementProperty>
-          <PropertyValue>FFFFFF</PropertyValue>
-          <PropertyType>LandingRateFontColor</PropertyType>
-        </elementProperty>
-      </properties>
-    </elementModel>
-  </Elements>
-</overlayModel>
+<!DOCTYPE html>
+    <html>
+<head>
+    <style>
+#LDGR{
+    z-index: 1000;
+    width: 234px; height: 136px;
+opacity: 0.9;
+left: 960px; top: 540px;
+transform: rotate(0deg) translate(-50%, -50%); transform-origin: 0% 0%;;
+
+}.projectLiveText { vertical-align: middle; } .DONOTCHANGETHIS {position: fixed;} .projectLiveLandingImage, .projectLiveLanding {width:inherit;height:inherit;} .relativePosition{position: relative;} .centeredText{width:100%; text-align:center;} .absolutePosition{position: absolute;} .easeTransition {transition: all 0.5s ease;} body {height:1080px;width:1920px;overflow:hidden;}</style> <script type="text/javascript" charset="UTF - 8">/* jshint esversion:6 */
+
+var isFinal = false;
+
+window.onload = function () {
+    if (document.body.id == "isFinal") {
+        isFinal = true;
+        var landingRates = document.getElementsByClassName("projectLiveLanding");
+        var i;
+        for (i = 0; i < landingRates.length; i++) {
+            landingRates[i].style.opacity = "0";
+            landingRates[i].classList.add("easeTransition");
+        }
+    }
+    if (document.body.getAttribute("data-is-instant") == "true") {
+        window.setInterval(instantOverlayRefresh, 3000);
+    }
+};
+
+function instantOverlayRefresh() {
+
+    fetch('http://localhost:8080/overlay/refreshkey')
+    .then((res) => res.text()
+    .then((text) => {
+        if (text != document.body.getAttribute("data-refresh-key")) {
+            location.reload();
+        }
+    }));
+
+}
+
+
+window.setInterval(getData, 50);
+
+function failedConnect(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response.text();
+}
+
+function getData() {
+    d = new Date();
+    n = d.getMilliseconds();
+    s = d.getSeconds();
+    r = n / s; //this creates an extreemely random number
+
+
+    fetch('http://localhost:8080/?' + r, {
+            mode: 'cors'
+        }) //the url is http://localhost:80/?<random number="">. The random number is to adoid web caching so the value is constantly updated - important for older browsers
+        .then(failedConnect)
+        //.then(function(response) {
+        //    return response.text();
+        //})
+        .then(function (response) {
+            parseData(data = response);
+        }).catch(function (error) {
+            console.log(error);
+
+            aircraftType = "n/a";
+            altitude = "n/a";
+            heading = "n/a";
+            groundSpeed = "n/a";
+            airSpeed = "n/a";
+            vSpeed = "n/a";
+            planeLat = "n/a";
+            planeLong = "n/a";
+            dep = "n/a";
+            arr = "n/a";
+            callsign = "n/a";
+            dtg = "n/a";
+            distance = "n/a";
+            flightPercent = "n/a";
+            eta = "n/a";
+            ttg = "n/a";
+            simTime = "n/a";
+            realTime = "n/a";
+            isConnected = "n/a";
+            fps = "n/a";
+
+            flightPercentDouble = 0;
+
+            setAllFlightData();
+        });
+
+}
+
+var flightDataPrefix = "flightDataSOURCE";
+
+var altitude;
+var heading;
+var groundSpeed;
+var airSpeed;
+var vSpeed;
+var planeLat;
+var planeLong;
+var dep;
+var arr;
+var callsign;
+var dtg;
+var distance;
+var flightPercent;
+var eta;
+var ttg;
+var simTime;
+var realTime;
+var isConnected;
+var onGround = false;
+var landingRate;
+
+var landingRateVisible = false;
+var landingRateSuffix = "";
+
+var metar;
+
+var fps;
+
+var aircraftType;
+
+function showLandingRate() {
+    if (landingRateVisible == false && landingRate != null) {
+        var landingRateTexts = document.getElementsByClassName("projectLiveLandingTextBottom");
+
+        var ii;
+        for (ii = 0; ii < landingRateTexts.length; ii++) {
+            var obj1 = landingRateTexts[ii];
+
+            if (landingRateSuffix != "") {
+                obj1.innerHTML = landingRateSuffix;
+            }
+
+            var _suffix;
+            _suffix = obj1.innerHTML;
+            landingRateSuffix = _suffix;
+
+            if (isTestingLanding) {
+                obj1.innerHTML = "-100" + _suffix;
+            } else {
+                if (landingRate <= 0) {
+                    obj1.innerHTML = landingRate + _suffix;
+                } else {
+                    obj1.innerHTML = "+" + landingRate + _suffix;
+                }
+                //showLandingRateIndividual(landingRate[i]);
+            }
+        }
+
+        landingRateVisible = true;
+        var landingRates = document.getElementsByClassName("projectLiveLanding");
+        var i;
+
+        if (!isTestingLanding) {
+            for (i = 0; i < landingRates.length; i++) {
+                //console.log("landing rate shown:" + i)
+                var obj = landingRates[i];
+
+                obj.style.opacity = "1";
+
+                setTimeout(function () {
+                    obj.style.opacity = "0";
+                    landingRateVisible = false;
+                }, obj.id * 1000);
+            }
+        } else {
+            for (i = 0; i < landingRates.length; i++) {
+                //console.log("landing rate shown:" + i)
+                var obj = landingRates[i];
+
+                obj.classList.remove("easeTransition");
+                obj.style.opacity = 0;
+
+                setTimeout(() => {
+                    obj.classList.add("easeTransition");
+                    obj.style.opacity = "1";
+
+                    setTimeout(function () {
+                        obj.style.opacity = "0";
+                        landingRateVisible = false;
+
+                        setTimeout(() => {
+                            obj.classList.remove("easeTransition");
+                            obj.style.opacity = "1";
+
+                            var landingRateTexts = document.getElementsByClassName("projectLiveLandingTextBottom");
+                            var iii;
+
+                            for (iii = 0; iii < landingRateTexts.length; iii++) {
+                                landingRateTexts[iii].innerHTML = landingRateTexts[iii].innerHTML.replace("-100", "");
+                            }
+
+                            setTimeout(() => {
+                                obj.classList.add("easeTransition");
+                                isTestingLanding = false;
+                                landingRateVisible = false;
+                            }, 500);
+                        }, 500);
+                    }, obj.id * 1000);
+                }, 500);
+
+            }
+        }
+
+
+    }
+
+}
+
+function parseData(data) {
+    dataSplit = data.split("@!!!!NEWLINEDONOTPUTTHISINTEXT!!!!@");
+
+    flightData = dataSplit[0];
+    customTextNames = dataSplit[1];
+    customTextTexts = dataSplit[2];
+    transformData = dataSplit[3];
+    landingRateTest = dataSplit[4];
+
+    flightDataSplit = flightData.split("; nextDataSource :");
+    customTextNamesSplit = customTextNames.split(",");
+    customTextTextsSplit = customTextTexts.split("!!!TEXTFILESEPARATOR!!!");
+
+    altitude = flightDataSplit[0];
+    heading = flightDataSplit[1];
+    groundSpeed = flightDataSplit[2];
+    airSpeed = flightDataSplit[3];
+    vSpeed = flightDataSplit[4];
+    planeLat = flightDataSplit[5];
+    planeLong = flightDataSplit[6];
+    dep = flightDataSplit[7];
+    arr = flightDataSplit[8];
+    callsign = flightDataSplit[9];
+    dtg = flightDataSplit[10];
+    distance = flightDataSplit[11];
+    flightPercent = flightDataSplit[12];
+    eta = flightDataSplit[13];
+    ttg = flightDataSplit[14];
+    simTime = flightDataSplit[15];
+    realTime = flightDataSplit[16];
+    isConnected = flightDataSplit[17];
+    flightPercentDouble = flightDataSplit[18];
+    landingRate = flightDataSplit[20];
+    
+    if (onGround != (flightDataSplit[19] == "true")) {
+        if (flightDataSplit[19] == "true") {
+            showLandingRate();
+        }
+    }
+    onGround = flightDataSplit[19] == "true";
+    metar = flightDataSplit[21];
+    fps = flightDataSplit[22];
+    aircraftType = flightDataSplit[23];
+
+
+    // console.log(customTextNamesSplit.length);
+
+    var index = customTextNamesSplit.length - 1;
+    var i;
+    for (i = 0; i < index; i++) {
+        setCustomText(
+            elementName = customTextNamesSplit[i],
+            valueToSet = customTextTextsSplit[i]
+        );
+    }
+
+    setAllFlightData();
+
+    setTransform(param = transformData)
+
+    handleLandingRateTest(landingRateTestText = landingRateTest)
+}
+
+var prevLandingRateTest;
+var isTestingLanding;
+
+function handleLandingRateTest(landingRateTestText) {
+    if (prevLandingRateTest != landingRateTestText && landingRateTestText == 1) {
+        isTestingLanding = true;
+        showLandingRate();
+    }
+}
+
+function setTransform(param) {
+    var split = param.split("transformSeparator");
+
+    isTransformingStr = split[0];
+    transformData = split[1];
+    transformProperty = split[2];
+    currentName = split[3];
+
+    isTransforming = isTransformingStr == "true" ? true : false;
+
+    if (isTransforming != true) return;
+
+    var element = document.getElementById(currentName);
+
+    switch (transformProperty) {
+        case "position":
+
+            element.style.left = transformData.split(",")[0] + "px";
+            element.style.top = transformData.split(",")[1] + "px";
+
+            break;
+        case "size":
+
+            element.style.width = transformData.split(",")[0] + "px";
+            element.style.height = transformData.split(",")[1] + "px";
+
+            break;
+        case "rotation":
+
+            element.style.transform = "transform: rotate(" + transformData + "deg) translate(-50%, -50%); transform-origin: 0% 0%";
+
+            break;
+    }
+
+}
+
+function setAllFlightData() {
+
+    setFlightData(suffix = "altitude", data = altitude);
+    setFlightData(suffix = "heading", data = heading);
+    setFlightData(suffix = "groundspeed", data = groundSpeed);
+    setFlightData(suffix = "ias", data = airSpeed);
+    setFlightData(suffix = "vs", data = vSpeed);
+    setFlightData(suffix = "latitude", data = planeLat);
+    setFlightData(suffix = "longitude", data = planeLong);
+    setFlightData(suffix = "departure", data = dep);
+    setFlightData(suffix = "arrival", data = arr);
+    setFlightData(suffix = "callsign", data = callsign);
+    setFlightData(suffix = "dtg", data = dtg);
+    setFlightData(suffix = "flightdistance", data = distance);
+    setFlightData(suffix = "progress", data = flightPercent);
+    setFlightData(suffix = "eta", data = eta);
+    setFlightData(suffix = "ttg", data = ttg);
+    setFlightData(suffix = "simulatortime", data = simTime);
+    setFlightData(suffix = "realtime", data = realTime);
+    setFlightData(suffix = "metar", data = metar);
+    setFlightData(suffix = "fps", data = fps);
+    setFlightData(suffix = "aircrafttype", data = aircraftType);
+}
+
+function setCustomText(elementName, valueToSet) {
+
+    var element = document.getElementById(elementName);
+    element.innerHTML = valueToSet;
+}
+
+function setFlightData(suffix, data) {
+
+    var elements = document.getElementsByClassName(flightDataPrefix + suffix);
+
+    var i;
+    for (i = 0; i < elements.length; i++) {
+        elements[i].innerHTML = data;
+    }
+
+    var progressBars = document.getElementsByClassName("projectLiveProgressFront");
+
+    var flightPercent1 = flightPercentDouble;
+    flightPercent1 = flightPercent1 * 100 + "%";
+
+    var i;
+    for (i = 0; i < progressBars.length; i++) {
+        progressBars[i].style.width = flightPercent1;
+    }
+}</script>
+<body class="projectLiveBody" id="isFinal" >
+<div class="DONOTCHANGETHIS" id="LDGR"   ><div class="projectLiveLanding relativePosition" id="5">
+    <img class="projectLiveLandingImage absolutePosition" id="LDGRLandingRateImage" src="Assets\0landing.png" />
+    <p class="projectLiveLandingTextTop absolutePosition centeredText" style="font-family: Arial; font-weight: 400; font-style:Normal;color: #FFFFFF; 
+-webkit-text-fill-color: #FFFFFF;font-size: 20px;top: 3%;" id="LDGRLandingRateTextTop" >Landing Rate</p>
+    <p class="projectLiveLandingTextBottom absolutePosition centeredText" style="font-family: Arial; font-weight: 400; font-style:Normal;color: #FFFFFF; 
+-webkit-text-fill-color: #FFFFFF;font-size: 50px;top: 7%;" id="LDGRLandingRateTextBottom" >fpm</p></div></div></body></html>
